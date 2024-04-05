@@ -1,21 +1,38 @@
-import { useContext, useState } from 'react';
-import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap";
-import { ProfileContext } from '../App';
-import { useDispatch } from 'react-redux';
-import { createPost } from '../features/posts/postsSlice';
+import { useContext, useState, useEffect } from "react";
+import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap"
+import { ProfileContext } from "../App";
+import { useDispatch, useSelector } from "react-redux";
+import { updatePost } from "../features/posts/postsSlice";
 
-export default function AddPostModal({ show, handleClose }) {
+function UpdatePostModal({ show, handleClose, postId }) {
   const { image, name } = useContext(ProfileContext);
   const dispatch = useDispatch();
 
+  const post = useSelector((state) =>
+    state.posts.find((post) => post.id === postId)
+  );
+
   const [imageUrl, setImageUrl] = useState("");
-  const [description, setDescription] = useState("")
+  const [description, setDescription] = useState("");
   const [invalidUrl, setInvalidUrl] = useState(false);
+
+  useEffect(() => {
+    if (post) {
+      setImageUrl(post.image);
+      setDescription(post.description);
+    }
+  }, [post]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (imageUrl) {
-      dispatch(createPost({ image: imageUrl, description }))
+      dispatch(
+        updatePost({
+          id: postId,
+          image: imageUrl,
+          description,
+        })
+      );
       setImageUrl("");
       setDescription("");
       handleClose();
@@ -35,7 +52,7 @@ export default function AddPostModal({ show, handleClose }) {
   return (
     <Modal show={show} onHide={handleClose} size="lg">
       <Modal.Header>
-        <Modal.Title>Create new post</Modal.Title>
+        <Modal.Title>Edit post</Modal.Title>
       </Modal.Header>
       <Form onSubmit={handleSubmit}>
         <Modal.Body>
@@ -85,4 +102,7 @@ export default function AddPostModal({ show, handleClose }) {
       </Form>
     </Modal>
   )
+
 }
+
+export default UpdatePostModal;
